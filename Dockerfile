@@ -5,6 +5,8 @@ RUN useradd --create-home --shell /bin/bash gingerbread
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
+        libqhull-dev \
+        libqhull8.0 \
         libpotrace-dev \
         cmake \
         libcairo2 \
