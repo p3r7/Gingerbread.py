@@ -193,15 +193,41 @@ class Converter:
 
         count = 0
         for el in drill_elms:
-            if el.local_name != "circle":
+            if not el.local_name in ("circle", "ellipse", "path"):
                 print(
                     f"- [yellow]Warning:[/yellow] non-circular element {el.local_name} not converted."
                 )
                 continue
 
-            x = self.doc.to_mm(el.get("cx"))
-            y = self.doc.to_mm(el.get("cy"))
-            d = self.doc.to_mm(float(el.get("r")) * 2)
+            d = 0
+            if el.local_name == "circle":
+                x = self.doc.to_mm(el.get("cx"))
+                y = self.doc.to_mm(el.get("cy"))
+                d = self.doc.to_mm(float(el.get("r")) * 2)
+            elif el.local_name == "ellipse":
+                x = self.doc.to_mm(el.get("cx"))
+                y = self.doc.to_mm(el.get("cy"))
+                rx = float(el.get("rx"))
+                ry = float(el.get("ry"))
+                r = max(rx, ry)
+                d = self.doc.to_mm(r * 2)
+            elif el.local_name == "path":
+                printv(f"- Drill element of type path found!")
+                edge_cuts_elems = [el]
+                for elem, path in _geometry.svg_elements_to_paths(edge_cuts_elems):
+                    if path is None:
+                        print(f"- [red] Not converting unknown element {elem.local_name}")
+                        continue
+                    brect = list(self.doc.iter_to_mm(_geometry.bbox_to_rect(*path.bbox())))
+                    r = min(brect[2], brect[3]) / 2
+                    d = r * 2
+
+                    x = brect[0] + brect[2] / 2
+                    y = brect[1] + brect[3] / 2
+
+                    print(
+                        f"- Drill from [cyan]{elem.local_name}[/cyan] with {len(path)} segments, bounding rect {brect}, x={x:.2f}, y={y:.2f}, r={r:.2f} mm"
+                    )
 
             self.pcb.add_drill(x, y, d)
 
