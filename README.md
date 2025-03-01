@@ -80,7 +80,7 @@ You can now run Gingerbread using Docker. You'll need to pass the current workin
 
 ```sh
 cd example
-docker run --rm -v "$PWD":/workdir gingerbread -m gingerbread.convert example.svg
+docker run --rm -v "$PWD":/workdir gingerbread gingerbread.convert example.svg
 ```
 
 
